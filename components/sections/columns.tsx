@@ -7,6 +7,8 @@
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button";
+import type { FormResponses } from "./tablewrapper";
+import { Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
   
   export const columns = [
@@ -28,7 +30,7 @@ import { MoreHorizontal } from "lucide-react";
     },
      {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row }: { row: Row<FormResponses> }) => {
       const response = row.original
 
       return (

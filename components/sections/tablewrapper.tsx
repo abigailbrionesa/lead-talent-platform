@@ -20,10 +20,8 @@ export default function DataTableWrapper() {
     const { data, error } = await supabase.from('form_responses').select('*')
     if (!error) setData(data)
   }
-
   useEffect(() => {
     fetchData()
-
     const subscription = supabase
       .channel('realtime:form_responses')
       .on(
@@ -38,11 +36,9 @@ export default function DataTableWrapper() {
         }
       )
       .subscribe()
-
     return () => {
       supabase.removeChannel(subscription)
     }
   }, [])
-
   return <DataTable columns={columns} data={data} />
 }
