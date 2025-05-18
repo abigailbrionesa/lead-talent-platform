@@ -31,7 +31,7 @@ interface RouteProps {
 export const Navbar = () => {
 
   const routeList: RouteProps[] = [
-   
+    { href: "https://forms.gle/BfxhPoF24UtPqnJH9", label: "Formulario" },
   ];
 
   const router = useRouter();
@@ -57,7 +57,7 @@ export const Navbar = () => {
           <NavigationMenuItem className="flex">
             {routeList.map(({ href, label }) => (
               <NavigationMenuLink key={href} asChild>
-                <Link href={href} className="text-base px-2">
+                <Link href={href} target="_blank" className="text-base px-2">
                   {label}
                 </Link>
               </NavigationMenuLink>
