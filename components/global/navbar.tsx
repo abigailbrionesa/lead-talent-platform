@@ -1,7 +1,6 @@
 "use client";
 import { Github, Menu } from "lucide-react";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -34,7 +33,6 @@ export const Navbar = () => {
     { href: "https://forms.gle/BfxhPoF24UtPqnJH9", label: "Formulario" },
   ];
 
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <header
