@@ -5,8 +5,16 @@ import { supabase } from '@/lib/supabase'
 import { DataTable } from '@/components/sections/table'
 import { columns } from '@/components/sections/columns'
 
+export type FormResponses = {
+  id: number;
+  name?: string | null;
+  email?: string | null;
+  age?: number | null;
+  submitted_at?: Date | null;
+};
+
 export default function DataTableWrapper() {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<FormResponses[]>([])
 
   const fetchData = async () => {
     const { data, error } = await supabase.from('form_responses').select('*')
