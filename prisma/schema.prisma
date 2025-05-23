@@ -9,9 +9,17 @@ datasource db {
 }
 
 model form_responses {
-  id           Int       @id @default(autoincrement())
-  name         String?
-  email        String?
-  age          Int?
-  submitted_at DateTime? @default(now()) @db.Timestamp(6)
+  id               Int      @id @default(autoincrement())
+  name             String
+  email            String
+  age              Int
+  phone            String
+  chapter          String
+  role             String
+  university_cycle String
+  career           String
+  linkedin_url     String
+  resume_url       String
+  availability     String   
+  submitted_at     DateTime  @default(now()) @db.Timestamp(6)
 }
