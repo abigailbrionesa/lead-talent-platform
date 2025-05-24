@@ -1,6 +1,7 @@
 "use client";
-import { Github, Menu } from "lucide-react";
+import { Github, Menu, User } from "lucide-react";
 import React, { useState } from "react";
+import UserButton from "../ui/user-button";
 import {
   Sheet,
   SheetContent,
@@ -21,19 +22,20 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
+import type { Session } from "next-auth";
 
 interface RouteProps {
   href: string;
   label: string;
 }
 
-export const Navbar = () => {
-
+export const Navbar = ({ session }: { session: Session | null }) => {
   const routeList: RouteProps[] = [
     { href: "https://forms.gle/BfxhPoF24UtPqnJH9", label: "Formulario" },
   ];
 
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <header
       className="shadow-inner 
@@ -48,6 +50,7 @@ export const Navbar = () => {
           height={100}
           className="h-auto mr-4 w-auto max-w-10"
         />
+        LEAD
       </Link>
 
       <NavigationMenu className="hidden lg:block mr-auto ">
@@ -81,13 +84,13 @@ export const Navbar = () => {
                 <SheetTitle className="flex items-center">
                   <Link href="/" className="flex items-center">
                     <Image
-                      src="/images/logo/yachaybot_logo2.png"
+                      src="/images/logo.jpeg"
                       alt="logo"
                       width={100}
                       height={100}
                       className="h-auto mr-4 w-auto max-w-10"
                     />
-                    YACHAYBOT
+                    LEAD
                   </Link>
                 </SheetTitle>
               </SheetHeader>
@@ -110,13 +113,11 @@ export const Navbar = () => {
               <Separator className="mb-2" />
               <div className="flex flex-col w-full gap-2">
                 <ToggleTheme />
-              
-                 
 
-                <Button 
-                  asChild 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
                   aria-label="View on GitHub"
                   className="w-full justify-start"
                 >
@@ -125,7 +126,7 @@ export const Navbar = () => {
                     target="_blank"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Github className="size-5 mr-2" /> 
+                    <Github className="size-5 mr-2" />
                   </Link>
                 </Button>
               </div>
@@ -138,13 +139,12 @@ export const Navbar = () => {
         <ToggleTheme />
 
         <Button asChild size="sm" variant="outline" aria-label="View on GitHub">
-          <Link
-            href="https://github.com/abigailbrionesa"
-            target="_blank"
-          >
-            <Github className="size-5" /> 
+          <Link href="https://github.com/abigailbrionesa" target="_blank">
+            <Github className="size-5" />
           </Link>
         </Button>
+
+        <UserButton session={session} />
       </div>
     </header>
   );
