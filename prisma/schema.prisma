@@ -8,7 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model form_responses {
+model FormResponse {
   id               Int      @id @default(autoincrement())
   name             String
   email            String
@@ -20,6 +20,104 @@ model form_responses {
   career           String
   linkedin_url     String
   resume_url       String
-  availability     String   
-  submitted_at     DateTime  @default(now()) @db.Timestamp(6)
+  availability     String
+  submitted_at     DateTime @default(now()) @db.Timestamp(6)
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  MEMBER
+  RECRUITER
+  ADMIN
+}
+
+enum AccessStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+
+
+
+
+
+
+model Member {
+  id               Int      @id @default(autoincrement())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  age              Int
+  phone            String
+  chapter          String
+  role             String
+  university_cycle String
+  career           String
+  linkedin_url     String
+  resume_url       String
+  availability     String
+  submitted_at     DateTime @default(now()) @db.Timestamp(6)
+}
+
+model Recruiter {
+  id               Int      @id @default(autoincrement())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company          String
+  petition_status  AccessStatus @default(PENDING)
+  petitioned_at    DateTime     @default(now()) @db.Timestamp(6)
+  reviewed_at      DateTime?
+  reviewed_by      String? // ID of admin
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  member        Member?
+  recruiter     Recruiter?
+
 }
