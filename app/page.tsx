@@ -1,13 +1,14 @@
 import DataTableWrapper from "../components/sections/tablewrapper";
-import { Navbar } from "@/components/global/navbar";
-export default async function Home() {
+import NavbarServer from "@/components/global/navbar-server";
+import AuthWrapper from "@/components/shared/auth-info"; 
+
+export default function Home() {
   return (
     <div>
-      <Navbar />
-      <div className="h-20"> </div>
-
-        <DataTableWrapper />
-
+      <NavbarServer />
+      <div className="h-20" />
+      <DataTableWrapper />
+      <AuthWrapper />
     </div>
   );
 }
