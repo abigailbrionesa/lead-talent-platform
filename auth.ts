@@ -1,11 +1,11 @@
-import NextAuth from 'next-auth';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import prisma from './lib/prisma';
-import Google from 'next-auth/providers/google';
-import Credentials from 'next-auth/providers/credentials';
-import { Role } from '@prisma/client';
+import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import prisma from "./lib/prisma";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import authConfig from "./auth.config";
 
 export const {
   handlers,
@@ -16,18 +16,9 @@ export const {
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  ...authConfig,
   providers: [
-    Google({
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture,
-          role: 'MEMBER' as Role,
-        };
-      },
-    }),
+    Google,
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -42,66 +33,65 @@ export const {
             })
             .safeParse(credentials);
 
-          if (!parsedCredentials.success) {
-            return null;
-          }
+          if (!parsedCredentials.success) return null;
 
           const { email, password } = parsedCredentials.data;
 
           const user = await prisma.user.findUnique({
             where: { email },
-            include: { member: true, recruiter: true },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              image: true,
+              password: true,
+              role: true,
+              isProfileComplete: true,
+            },
           });
 
-          if (!user) {
-            return null;
-          }
-
-          if (!user.password) {
-            return null;
-          }
+          if (!user || !user.password) return null;
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
-
-          if (!passwordsMatch) {
-            return null;
-          }
+          if (!passwordsMatch) return null;
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
             image: user.image,
+            role: user.role,
+            isProfileComplete: user.isProfileComplete,
           };
         } catch (error) {
-          console.error("Credentials auth error:", error);
+          console.error("credentials auth error:", error);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.id as string
-        session.user.role = token.role as Role;
-      }
-      return session;
-    },
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-      }
+  async session({ session, user }) {
+    if (!session.user?.email) return session;
 
-      if (trigger === "update" && session?.user) {
-        token.name = session.user.name;
-      }
+    const dbUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: {
+        id: true,
+        role: true,
+        isProfileComplete: true,
+      },
+    });
 
-      return token;
-    },
+    if (dbUser) {
+      session.user.id = dbUser.id;
+      session.user.role = dbUser.role;
+      session.user.isProfileComplete = dbUser.isProfileComplete;
+    }
+
+    return session;
   },
+},
   pages: {
     signIn: "/login",
   },
