@@ -11,25 +11,30 @@ export interface FormResponse {
   age: number;
   phone: string;
   chapter: string;
-  role: string;
+  lead_role: string;
   university_cycle: string;
   career: string;
   availability: string;
   linkedin_url: string;
   resume_url: string;
 }
-
 export default function DataTableWrapper() {
   const [data, setData] = useState<FormResponse[]>([])
 
   const fetchData = async () => {
-  const { data, error } = await supabase
-    .from('Member')
-    .select('*')
+const { data, error } = await supabase
+  .from('Member')
+  .select('*, User(name, email)')
 
-  console.log(data)
-    if (!error) setData(data)
+    if (error) {
+      console.error('Error fetching members:', error)
+      return
+    }
+
+    console.log(data)
+    setData(data)
   }
+
   useEffect(() => {
     fetchData()
     const subscription = supabase
@@ -39,15 +44,17 @@ export default function DataTableWrapper() {
         {
           event: '*',
           schema: 'public',
-          table: 'Member',
+          table: 'Member'
         },
-        () => {
+        payload => {
+          console.log('Realtime payload:', payload)
           fetchData()
         }
       )
       .subscribe()
+
     return () => {
-      supabase.removeChannel(subscription)
+      subscription.unsubscribe()
     }
   }, [])
   return <DataTable columns={columns} data={data} />
