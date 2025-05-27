@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useActionState } from "react";
 import { completeProfileAction } from "@/actions/complete-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +45,10 @@ export default function CompleteProfilePage() {
             <div>
               <Label htmlFor="university_cycle">University Cycle</Label>
               <Input name="university_cycle" required />
+            </div>
+            <div>
+              <Label htmlFor="lead_role">LEAD Role</Label>
+              <Input name="lead_role" required />
             </div>
             <div>
               <Label htmlFor="career">Career</Label>
