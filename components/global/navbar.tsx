@@ -23,7 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
 import type { Session } from "next-auth";
-
+import { NavUser } from "../ui/nav-user";
 interface RouteProps {
   href: string;
   label: string;
@@ -144,7 +144,8 @@ export const Navbar = ({ session }: { session: Session | null }) => {
           </Link>
         </Button>
 
-        <UserButton session={session} />
+        <UserButton user={session?.user} />
+        
       </div>
     </header>
   );
