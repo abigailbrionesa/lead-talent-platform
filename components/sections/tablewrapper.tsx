@@ -23,19 +23,23 @@ export default function DataTableWrapper() {
   const [data, setData] = useState<FormResponse[]>([])
 
   const fetchData = async () => {
-    const { data, error } = await supabase.from('form_responses').select('*')
+  const { data, error } = await supabase
+    .from('Member')
+    .select('*')
+
+  console.log(data)
     if (!error) setData(data)
   }
   useEffect(() => {
     fetchData()
     const subscription = supabase
-      .channel('realtime:form_responses')
+      .channel('realtime:Member')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'form_responses',
+          table: 'Member',
         },
         () => {
           fetchData()
