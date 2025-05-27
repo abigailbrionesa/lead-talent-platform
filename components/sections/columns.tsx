@@ -18,7 +18,7 @@ import { MoreHorizontal } from "lucide-react";
   { accessorKey: "age", header: "Age" },
   { accessorKey: "phone", header: "Phone" },
   { accessorKey: "chapter", header: "Chapter" },
-  { accessorKey: "role", header: "Role" },
+  { accessorKey: "lead_role", header: "Role" },
   { accessorKey: "university_cycle", header: "University Cycle" },
   { accessorKey: "career", header: "Career" },
   { accessorKey: "availability", header: "Availability" },
