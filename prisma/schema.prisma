@@ -75,11 +75,6 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-
-
-
-
-
 model Member {
   id               Int      @id @default(autoincrement())
   userId           String   @unique
@@ -87,7 +82,7 @@ model Member {
   age              Int
   phone            String
   chapter          String
-  role             String
+  lead_role        String
   university_cycle String
   career           String
   linkedin_url     String
@@ -119,5 +114,5 @@ model User {
   sessions      Session[]
   member        Member?
   recruiter     Recruiter?
-
+  isProfileComplete Boolean @default(false)
 }
