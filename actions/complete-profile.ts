@@ -43,7 +43,7 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         age: parseInt(formData.get("age") as string),
         phone: formData.get("phone") as string,
         chapter: formData.get("chapter") as string,
-        role: formData.get("roleDetail") as string,
+        lead_role: formData.get("lead_role") as string,
         university_cycle: formData.get("university_cycle") as string,
         career: formData.get("career") as string,
         linkedin_url: formData.get("linkedin_url") as string,
@@ -56,7 +56,7 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
 
       await prisma.user.update({
         where: { id: user.id },
-        data: { isProfileComplete: true },
+        data: { role: "MEMBER", isProfileComplete: true },
       });
       await update({
       user: {
