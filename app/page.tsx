@@ -9,8 +9,6 @@ export default function Home() {
     <div>
       <NavbarServer />
       <LandingSection />
-      <AuthInfo/>
-
     </div>
   );
 }
