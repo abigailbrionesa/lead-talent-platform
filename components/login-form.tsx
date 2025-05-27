@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/registry/new-york-v4/ui/button";
-import { Input } from "@/registry/new-york-v4/ui/input";
-import { Label } from "@/registry/new-york-v4/ui/label";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 
