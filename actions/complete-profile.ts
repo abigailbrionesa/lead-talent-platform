@@ -6,38 +6,22 @@ import { update } from "@/auth";
 import { redirect } from "next/navigation";
 
 export async function completeProfileAction(formData: FormData): Promise<void> {
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}: ${value}`);
-  }
-
   const session = await auth();
-  console.log("session:", session);
-
-  if (!session?.user?.email) {
-    console.error("no authenticated session");
-    throw new Error("not authenticated");
-  }
+  if (!session?.user?.email) throw new Error("not authenticated");
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
   });
-  console.log("fetched user:", user);
-
-  if (!user) {
-    console.error("user not found in database for email:", session.user.email);
-    throw new Error("user not found");
-  }
+  if (!user) throw new Error("user not found");
 
   const role = formData.get("role") as "MEMBER" | "RECRUITER";
-  console.log("selected role:", role);
-
-  if (role !== "MEMBER" && role !== "RECRUITER") {
-    console.error("invalid role provided:", role);
-    throw new Error("invalid role selected");
-  }
+  if (!["MEMBER", "RECRUITER"].includes(role)) throw new Error("invalid role selected");
 
   try {
     if (role === "MEMBER") {
+      const existing = await prisma.member.findUnique({ where: { userId: user.id } });
+      if (existing) throw new Error("User is already registered as a member");
+
       const memberData = {
         userId: user.id,
         age: parseInt(formData.get("age") as string),
@@ -50,7 +34,6 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         resume_url: formData.get("resume_url") as string,
         availability: formData.get("availability") as string,
       };
-      console.log("Creating member with data:", memberData);
 
       await prisma.member.create({ data: memberData });
 
@@ -58,18 +41,21 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         where: { id: user.id },
         data: { role: "MEMBER", isProfileComplete: true },
       });
+
       await update({
-      user: {
-        id: user.id,
-        isProfileComplete: true,
-      },
-    });
+        user: {
+          id: user.id,
+          isProfileComplete: true,
+        },
+      });
     } else if (role === "RECRUITER") {
+      const existing = await prisma.recruiter.findUnique({ where: { userId: user.id } });
+      if (existing) throw new Error("User is already registered as a recruiter");
+
       const recruiterData = {
         userId: user.id,
         company: formData.get("company") as string,
       };
-      console.log("creating recruiter with data:", recruiterData);
 
       await prisma.recruiter.create({ data: recruiterData });
 
@@ -77,6 +63,7 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         where: { id: user.id },
         data: { role: "RECRUITER", isProfileComplete: true },
       });
+
       await update({
         user: {
           id: user.id,
@@ -85,11 +72,9 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
       });
     }
   } catch (error: any) {
-    console.error("error completing profile:", error.message || error);
-    throw new Error("failed to complete profile. " + (error.message || ""));
+    console.error("Error completing profile:", error);
+    throw new Error("Failed to complete profile. " + (error.message || ""));
   }
-  console.log("profile completed successfully. Redirecting...");
+
   redirect("/");
 }
-
-
