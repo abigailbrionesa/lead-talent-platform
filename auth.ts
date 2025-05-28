@@ -79,6 +79,7 @@ export const {
       select: {
         id: true,
         role: true,
+        image: true,
         isProfileComplete: true,
       },
     });
@@ -86,9 +87,9 @@ export const {
     if (dbUser) {
       session.user.id = dbUser.id;
       session.user.role = dbUser.role;
+      session.user.image = dbUser.image;
       session.user.isProfileComplete = dbUser.isProfileComplete;
     }
-
     return session;
   },
 },
