@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import SignIn from "./sign-in";
 import type { User } from "next-auth";
+import { cn } from "@/lib/utils";
 import {
   BadgeCheck,
   Bell,
@@ -22,24 +23,43 @@ import { Button } from "./button";
 import SignOut from "./sign-out";
 import { signOut } from "next-auth/react";
 
-export default function UserButton({ user }: { user: User | undefined }) {
+import { Tooltip,TooltipTrigger,TooltipContent } from "./tooltip";
+import { AlertCircle } from "lucide-react";
+export default function UserButton({ user }: { user: User & { isProfileComplete: boolean } | undefined }) {
   if (!user) return <SignIn />;
+  const fallbackText = "CN";
+  const showWarning = !user.isProfileComplete;
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button size="lg" variant={"ghost"} className="">
+        <Button size="lg" variant={"ghost"} className="gap-2">
           <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src={user.image ?? "/placeholder.svg"} />
-            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+            <AvatarImage
+              src={user.image || undefined}
+              alt={user.name || "User avatar"}
+              onError={(e) => (e.currentTarget.style.display = "none")}
+            />
+            <AvatarFallback className="rounded-lg">{fallbackText}</AvatarFallback>
           </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight">
+          <div className="grid text-left text-sm leading-tight">
             <span className="truncate font-semibold">{user.name}</span>
             <span className="truncate text-xs">{user.role}</span>
           </div>
+          {showWarning && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertCircle className="ml-1 size-4 text-yellow-500" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Tu perfil está incompleto</span>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <ChevronsUpDown className="ml-auto size-4" />
         </Button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent
         className="min-w-56 rounded-lg bg-background"
         side={"bottom"}
@@ -57,23 +77,21 @@ export default function UserButton({ user }: { user: User | undefined }) {
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <Link
             href="/account"
             passHref
-            className="cursor-pointer
-          
-          focus:bg-slate-100 focus:text-slate-900 
-          
-          
-        relative flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none  [&_svg]:pointer-events-none [&_svg]:shrink-0
-         [&_svg:not([class*='size-'])]:size-4 dark:focus:bg-slate-800 dark:focus:text-slate-50
-         [&_svg:not([class*='text-'])]:text-slate-500 
-       dark:[&_svg:not([class*='text-'])]:text-slate-400"
+            className={cn(
+              "cursor-pointer relative flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 dark:[&_svg:not([class*='text-'])]:text-slate-400",
+              showWarning
+                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100 font-semibold"
+                : "focus:bg-slate-100 dark:focus:bg-slate-800"
+            )}
           >
-            <Settings /> Editar Perfil
+            <Settings />
+            Editar Perfil {showWarning && <span className="ml-auto text-xs font-semibold">¡Completa tu perfil!</span>}
           </Link>
 
           <DropdownMenuItem>
@@ -81,6 +99,7 @@ export default function UserButton({ user }: { user: User | undefined }) {
             Notificaciones
           </DropdownMenuItem>
         </DropdownMenuGroup>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut />
