@@ -12,6 +12,8 @@ interface LoginFormProps extends React.ComponentProps<"form"> {
 export function LoginForm({ className, error, ...props }: LoginFormProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)}>
+
+      {/* 
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
 
@@ -65,14 +67,14 @@ export function LoginForm({ className, error, ...props }: LoginFormProps) {
             Login
           </Button>
         </form>
-      </div>
+      </div>*/}
 
       <div className="grid gap-6">
-        <div className="after:border-slate-200 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t dark:after:border-slate-800">
+        {/* <div className="after:border-slate-200 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t dark:after:border-slate-800">
           <span className=" text-slate-500 relative z-10 px-2 ">
             Or continue with
           </span>
-        </div>
+        </div>*/}
 
         <form
           onSubmit={async (e) => {
@@ -89,12 +91,14 @@ export function LoginForm({ className, error, ...props }: LoginFormProps) {
           </Button>
         </form>
       </div>
+      
+      {/* 
       <div className="text-center text-sm">
         Don&apos;t have an account? {""}
         <Link href="/register" className="text-blue-600 hover:underline">
           Register here
         </Link>
-      </div>
+      </div>*/}
     </div>
   );
 }
