@@ -1,13 +1,33 @@
 import NavbarServer from "@/components/global/navbar-server";
-import AuthWrapper from "@/components/shared/auth-info"; 
-import LandingSection from "@/components/sections/landing";
+import { getSession } from "next-auth/react";
+import prisma from "@/lib/prisma";
+import MemberForm from "./member-form";
+import RecruiterForm from "./recruiter-form";
+import { auth } from "@/auth";
 
-export default function AccountPage() {
+export default async function AccountPage() {
+  const session = await auth();
+  if (!session) return <div>Not authenticated</div>
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      member: true,
+      recruiter: true,
+    },
+  });
+
+  console.log(user)
+
+  if (!user) return <p>User not found</p>;
+
   return (
     <div>
       <NavbarServer />
       <div className="h-20" />
-      <AuthWrapper />
+      <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
+        <MemberForm user={user} />
+    
     </div>
   );
 }
