@@ -23,17 +23,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
 import type { Session } from "next-auth";
-import { NavUser } from "../ui/nav-user";
 interface RouteProps {
   href: string;
   label: string;
 }
 
 export const Navbar = ({ session }: { session: Session | null }) => {
-  const routeList: RouteProps[] = [
-    { href: "https://forms.gle/BfxhPoF24UtPqnJH9", label: "Formulario" },
-  ];
-
+    const routeList: RouteProps[] = session?.user.role === "RECRUITER"
+      ? [{ href: "/dashboard", label: "Tabla de Miembros" }]
+      : [];
+      
   const [isOpen, setIsOpen] = useState(false);
 
   return (
