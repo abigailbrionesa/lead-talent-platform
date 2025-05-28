@@ -1,8 +1,6 @@
 import NavbarServer from "@/components/global/navbar-server";
-import { getSession } from "next-auth/react";
 import prisma from "@/lib/prisma";
-import MemberForm from "./member-form";
-import RecruiterForm from "./recruiter-form";
+import AccountForm from "./account-form";
 import { auth } from "@/auth";
 
 export default async function AccountPage() {
@@ -26,8 +24,7 @@ export default async function AccountPage() {
       <NavbarServer />
       <div className="h-20" />
       <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
-        <MemberForm user={user} />
-    
+        <AccountForm user={user} />
     </div>
   );
 }
