@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const memberSchema = z.object({
   role: z.literal("MEMBER"),
-  age: z.coerce.number().min(18).max(100),
+  age: z.coerce.number().min(18).max(100), // birth date is better
   phone: z.string().min(9).max(15),
   chapter: z.string().min(2),
   university_cycle: z.string().min(1),
