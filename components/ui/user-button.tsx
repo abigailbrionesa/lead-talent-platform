@@ -10,7 +10,7 @@ import {
 } from "./dropdown-menu";
 import Link from "next/link";
 import SignIn from "./sign-in";
-import type { User } from "next-auth";
+import type { User } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import {
   BadgeCheck,
@@ -20,12 +20,12 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "./button";
-import SignOut from "./sign-out";
 import { signOut } from "next-auth/react";
 
 import { Tooltip,TooltipTrigger,TooltipContent } from "./tooltip";
 import { AlertCircle } from "lucide-react";
-export default function UserButton({ user }: { user: User & { isProfileComplete: boolean } | undefined }) {
+
+export default function UserButton({ user }: { user: User | null }) {
   if (!user) return <SignIn />;
   const fallbackText = "CN";
   const showWarning = !user.isProfileComplete;
