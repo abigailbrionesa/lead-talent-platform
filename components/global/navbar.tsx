@@ -22,14 +22,18 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
-import type { Session } from "next-auth";
+import type { Role } from "@prisma/client";
+import type { User as UserType2 } from "next-auth";
+
+import type { User as UserType } from "@prisma/client";
+
 interface RouteProps {
   href: string;
   label: string;
 }
 
-export const Navbar = ({ session }: { session: Session | null }) => {
-    const routeList: RouteProps[] = session?.user.role === "RECRUITER"
+export const Navbar = ({ user }: { user: UserType |  undefined }) => {
+    const routeList: RouteProps[] = user?.role === "RECRUITER"
       ? [{ href: "/dashboard", label: "Tabla de Miembros" }]
       : [];
       
@@ -143,7 +147,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
           </Link>
         </Button>
 
-        <UserButton user={session?.user} />
+        <UserButton user={user} />
         
       </div>
     </header>
