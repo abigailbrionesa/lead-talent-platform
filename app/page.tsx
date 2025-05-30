@@ -1,14 +1,16 @@
-import DataTableWrapper from "../components/sections/tablewrapper";
-import NavbarServer from "@/components/global/navbar-server";
+
 import LandingSection from "@/components/sections/landing";
-import AuthInfo from "@/components/shared/auth-info";
-export default function Home() {
-  const title= "LEAD"
-  const words = title.split(" ")
+import { auth } from "@/auth";
+import { Navbar } from "@/components/global/navbar";
+
+export default async function Home() {
+  const session = await auth();
+  console.log("session", session)
+
   return (
     <div>
-      <NavbarServer />
-      <LandingSection />
+      <Navbar user={session?.user} />
+      <LandingSection user={session?.user} />
     </div>
   );
 }
