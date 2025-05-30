@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { update } from "@/auth";
 import { redirect } from "next/navigation";
 import { formSchema } from "@/lib/schemas";
+import { toast } from "sonner";
 
 function formDataToObject<T = any>(formData: FormData): T {
   const obj: any = {};
@@ -91,7 +92,15 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
     console.error("error completing profile:", error);
     throw new Error("failed to complete profile. " + (error.message || ""));
   }
-
+  toast("Event has been created", {
+            description: "Sunday, December 03, 2023 at 9:00 AM",
+            action: {
+              label: "Undo",
+              onClick: () => console.log("Undo"),
+            },
+          })
+  
   redirect("/");
+
 
 }
