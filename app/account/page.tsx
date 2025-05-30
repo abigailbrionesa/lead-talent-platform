@@ -1,7 +1,7 @@
-import NavbarServer from "@/components/global/navbar-server";
 import prisma from "@/lib/prisma";
 import AccountForm from "./account-form";
 import { auth } from "@/auth";
+import { Navbar } from "@/components/global/navbar";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -21,7 +21,7 @@ export default async function AccountPage() {
 
   return (
     <div>
-      <NavbarServer />
+      <Navbar user={session?.user} />
       <div className="h-20" />
       <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
         <AccountForm user={user} />
