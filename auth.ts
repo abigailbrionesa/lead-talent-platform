@@ -71,28 +71,41 @@ export const {
     }),
   ],
   callbacks: {
-  async session({ session, user }) {
-    if (!session.user?.email) return session;
-
-    const dbUser = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        id: true,
-        role: true,
-        image: true,
-        isProfileComplete: true,
-      },
-    });
-
-    if (dbUser) {
-      session.user.id = dbUser.id;
-      session.user.role = dbUser.role;
-      session.user.image = dbUser.image;
-      session.user.isProfileComplete = dbUser.isProfileComplete;
+    async jwt({ token, user }) {
+    if (user) {
+      token.id = user.id;
+      token.role = null;
+      token.isProfileComplete = false;
+      token.emailVerified = false
     }
-    return session;
+    return token;
   },
-},
+    async session({ session }) {
+      if (!session.user?.email) return session;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+          id: true,
+          role: true,
+          image: true,
+          isProfileComplete: true,
+          emailVerified: true,
+          password: true,
+        },
+      });
+
+      if (dbUser) {
+        session.user.id = dbUser.id;
+        session.user.role = dbUser.role;
+        session.user.image = dbUser.image;
+        session.user.isProfileComplete = dbUser.isProfileComplete;
+        session.user.emailVerified = dbUser.emailVerified;
+        session.user.password = dbUser.password;
+      }
+      return session;
+    },
+  },
   pages: {
     signIn: "/login",
   },
