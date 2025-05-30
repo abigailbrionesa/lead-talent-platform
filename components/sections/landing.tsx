@@ -1,17 +1,30 @@
-"use client"
-import { motion } from "framer-motion"
-export default function LandingSection() {
-  const title= "LEAD PERU"
-  const words = title.split(" ")
-  return (
+"use client";
+import { motion } from "framer-motion";
+import SignIn from "../ui/sign-in";
+import { Sign } from "crypto";
+import {
+  Card,
+  CardTitle,
+  CardHeader,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "../ui/card";
+import { Button } from "../ui/button";
+import type { User as UserType } from "@prisma/client";
 
-       <div className=" min-h-screen  flex items-center justify-center  bg-background">
-      <div className="mx-auto px-4 md:px-6 text-center">
+
+export default function LandingSection({ user }: { user: UserType | null }) {
+  const title = "LEAD Talent Platform";
+  const words = title.split(" ");
+  return (
+    <div className=" min-h-screen  flex items-center justify-center  bg-background">
+      <div className="mx-auto px-4 md:px-6 ">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 2 }}
-          className="max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto text-center"
         >
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold mb-8 tracking-tighter">
             {words.map((word, wordIndex) => (
@@ -37,10 +50,60 @@ export default function LandingSection() {
               </span>
             ))}
           </h1>
-
-         
+       
         </motion.div>
+
+
+           <p className="text-2xl max-w-lg mx-auto text-center">
+            Conectamos el talento universitario LEAD con las mejores
+            oportunidades profesionales.
+          </p>
+
+
+          <Card className="w-[350px] mx-auto mt-10">
+            <CardHeader>
+              <CardTitle>Crea tu perfil ahora</CardTitle>
+              <CardDescription>
+                ¿Eres estudiante o reclutador? ¿Quieres unirte a LEAD y conectar
+                con talento?
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-between">
+              <SignIn />
+            </CardFooter>
+          </Card>
+
+                    <Card className="w-[350px] mx-auto mt-10">
+            <CardHeader>
+              <CardTitle>Bienvenido, </CardTitle>
+              <CardDescription>
+                Eres parte de LEAD como Miembro. Tu perfil ahora está en la base de datos
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-between">
+                  <Button  size="sm" variant="outline">
+      Ver perfil
+    </Button>
+            </CardFooter>
+          </Card>
+
+                    <Card className="w-[350px] mx-auto mt-10">
+            <CardHeader>
+              <CardTitle>Bienvenido, </CardTitle>
+              <CardDescription>
+                Encuentra talento en la comunidad LEAD
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-between">
+              <Button  size="sm" variant="outline">
+      Ver base de datos
+    </Button>
+            </CardFooter>
+          </Card>
+
       </div>
+
+      
     </div>
   );
 }
