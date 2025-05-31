@@ -22,9 +22,6 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
-import type { Role } from "@prisma/client";
-import type { User as UserType2 } from "next-auth";
-
 import type { User as UserType } from "@prisma/client";
 
 interface RouteProps {
