@@ -1,6 +1,5 @@
-import NavbarServer from "@/components/global/navbar-server";
-import AuthWrapper from "@/components/shared/auth-info"; 
 import DataTableWrapper from "@/components/sections/tablewrapper";
+import { Navbar } from "@/components/global/navbar";
 import { auth } from "@/auth";
 
 export default async function DashboardPage() {
@@ -16,7 +15,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <NavbarServer />
+      <Navbar user={session?.user} />
       <div className="h-20" />
       <DataTableWrapper />
     </div>
