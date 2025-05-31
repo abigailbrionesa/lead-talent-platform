@@ -10,10 +10,8 @@ import {
 } from "./dropdown-menu";
 import Link from "next/link";
 import SignIn from "./sign-in";
-import type { User } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import {
-  BadgeCheck,
   Bell,
   ChevronsUpDown,
   Settings,
@@ -24,8 +22,9 @@ import { signOut } from "next-auth/react";
 
 import { Tooltip,TooltipTrigger,TooltipContent } from "./tooltip";
 import { AlertCircle } from "lucide-react";
+import type { User as UserType } from "@prisma/client";
 
-export default function UserButton({ user }: { user: User | null }) {
+export default function UserButton({ user }: { user: UserType |  undefined }) {
   if (!user) return <SignIn />;
   const fallbackText = "CN";
   const showWarning = !user.isProfileComplete;
