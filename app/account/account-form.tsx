@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { completeProfileAction } from "@/actions/complete-profile2";
+import { completeProfileAction } from "@/actions/complete-profile";
 import {
   Form,
   FormControl,
