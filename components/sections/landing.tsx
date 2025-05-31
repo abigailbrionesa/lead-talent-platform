@@ -1,21 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
 import SignIn from "../ui/sign-in";
-import { Sign } from "crypto";
 import {
   Card,
   CardTitle,
   CardHeader,
-  CardContent,
   CardDescription,
   CardFooter,
 } from "../ui/card";
 import { Button } from "../ui/button";
 import type { User as UserType } from "@prisma/client";
+import { EditProfileButton } from "../ui/edit-profile-button";
 
-
-export const LandingSection = ({ user }: { user: UserType |  undefined }) => {
+export const LandingSection = ({ user }: { user: UserType | undefined }) => {
   const title = "LEAD Talent Platform";
+  console.log(user?.role);
   const words = title.split(" ");
   return (
     <div className=" min-h-screen  flex items-center justify-center  bg-background">
@@ -50,16 +49,14 @@ export const LandingSection = ({ user }: { user: UserType |  undefined }) => {
               </span>
             ))}
           </h1>
-       
         </motion.div>
 
+        <p className="text-2xl max-w-lg mx-auto text-center">
+          Conectamos el talento universitario LEAD con las mejores oportunidades
+          profesionales.
+        </p>
 
-           <p className="text-2xl max-w-lg mx-auto text-center">
-            Conectamos el talento universitario LEAD con las mejores
-            oportunidades profesionales.
-          </p>
-
-
+          {!user && (
           <Card className="w-[350px] mx-auto mt-10">
             <CardHeader>
               <CardTitle>Crea tu perfil ahora</CardTitle>
@@ -72,38 +69,55 @@ export const LandingSection = ({ user }: { user: UserType |  undefined }) => {
               <SignIn />
             </CardFooter>
           </Card>
+        )}
 
-                    <Card className="w-[350px] mx-auto mt-10">
+           {user && !user.role && (
+          <Card className="w-[350px] mx-auto mt-10">
             <CardHeader>
-              <CardTitle>Bienvenido, </CardTitle>
+              <CardTitle>Completa tu perfil ahora</CardTitle>
               <CardDescription>
-                Eres parte de LEAD como Miembro. Tu perfil ahora está en la base de datos
+                ¿Eres miembro o recruiter?
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-between">
-                  <Button  size="sm" variant="outline">
-      Ver perfil
-    </Button>
+              <EditProfileButton/>
             </CardFooter>
           </Card>
+        )}
 
-                    <Card className="w-[350px] mx-auto mt-10">
+        {user?.role === "MEMBER" && (
+          <Card className="w-[350px] mx-auto mt-10">
             <CardHeader>
-              <CardTitle>Bienvenido, </CardTitle>
+              <CardTitle>Bienvenido,</CardTitle>
+              <CardDescription>
+                Eres parte de LEAD como Miembro. Tu perfil ahora está en la base
+                de datos.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-between">
+              <Button size="sm" variant="outline">
+                Ver perfil
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
+        {user?.role === "RECRUITER" && (
+          <Card className="w-[350px] mx-auto mt-10">
+            <CardHeader>
+              <CardTitle>Bienvenido,</CardTitle>
               <CardDescription>
                 Encuentra talento en la comunidad LEAD
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-between">
-              <Button  size="sm" variant="outline">
-      Ver base de datos
-    </Button>
+              <Button size="sm" variant="outline">
+                Ver base de datos
+              </Button>
             </CardFooter>
           </Card>
-
+        )}
       </div>
-
-      
     </div>
   );
-}
+};
