@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import type { User as UserType } from "@prisma/client";
 
 
-export default function LandingSection({ user }: { user: UserType | null }) {
+export const LandingSection = ({ user }: { user: UserType |  undefined }) => {
   const title = "LEAD Talent Platform";
   const words = title.split(" ");
   return (
