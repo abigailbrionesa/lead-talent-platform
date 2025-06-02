@@ -15,8 +15,6 @@ export default async function AccountPage() {
     },
   });
 
-  console.log(user)
-
   if (!user) return <p>User not found</p>;
 
   return (
