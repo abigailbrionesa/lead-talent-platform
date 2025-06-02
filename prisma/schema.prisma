@@ -51,6 +51,20 @@ enum AccessStatus {
   DENIED
 }
 
+enum LeadChapter {
+  TECSUP
+  UTEC
+  UPN
+  VILLAREAL
+  UNI
+}
+
+enum LeadRole {
+  Presidente
+  Vicepresidente
+  Miembro
+}
+
 model VerificationToken {
   identifier String
   token      String
@@ -63,15 +77,17 @@ model Member {
   id               Int      @id @default(autoincrement())
   userId           String   @unique
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  age              Int
+  birthday         String
   phone            String
-  chapter          String
-  lead_role        String
-  university_cycle String
+  chapter          LeadChapter
+  lead_role        LeadRole
+  university_cycle Int
   career           String
   linkedin_url     String
   resume_url       String
   availability     String
+  skills           String[]
+  languages        String[]
   submitted_at     DateTime @default(now()) @db.Timestamp(6)
 }
 
