@@ -5,18 +5,31 @@ import prisma from "@/lib/prisma";
 import { update } from "@/auth";
 import { redirect } from "next/navigation";
 import { formSchema } from "@/lib/schemas";
+import { combineBirthday } from "@/utils/utils";
+import { LeadChapter } from "@prisma/client";
 
-function formDataToObject<T = any>(formData: FormData): T {
-  const obj: any = {};
-  formData.forEach((value, key) => {
-    obj[key] = value;
-  });
+function formDataToObject(formData: FormData) {
+  const obj: Record<string, any> = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (obj[key]) {
+      if (Array.isArray(obj[key])) {
+        obj[key].push(value);
+      } else {
+        obj[key] = [obj[key], value];
+      }
+    } else {
+      obj[key] = value;
+    }
+  }
+
   return obj;
 }
 
 export async function completeProfileAction(formData: FormData): Promise<void> {
+  console.log(formData, "is form data")
 
-  const session = await auth();
+    const session = await auth();
   if (!session?.user?.email) throw new Error("not authenticated");
 
   const user = await prisma.user.findUnique({
@@ -38,15 +51,21 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
     if (data.role === "MEMBER") {
       const memberData = {
         userId: user.id,
-        age: Number(data.age),
+        birthday: combineBirthday({
+          day: data.birthday_day,
+          month: data.birthday_month,
+          year: data.birthday_year,
+        }),
         phone: data.phone,
-        chapter: data.chapter,
+        chapter: LeadChapter[data.chapter as keyof typeof LeadChapter],
         lead_role: data.lead_role,
-        university_cycle: data.university_cycle,
+        university_cycle: Number(data.university_cycle),
         career: data.career,
         linkedin_url: data.linkedin_url,
         resume_url: data.resume_url,
         availability: data.availability,
+        languages: data.languages,
+        skills: data.skills,
       };
 
       await prisma.member.upsert({
@@ -59,7 +78,6 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         where: { id: user.id },
         data: { role: "MEMBER", isProfileComplete: true },
       });
-
     } else if (data.role === "RECRUITER") {
       const recruiterData = {
         userId: user.id,
@@ -85,14 +103,12 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
       },
     });
 
-    console.log("succesful")
-
+    console.log("succesful");
+    
   } catch (error: any) {
     console.error("error completing profile:", error);
     throw new Error("failed to complete profile. " + (error.message || ""));
   }
-  
+
   redirect("/");
-
-
 }
