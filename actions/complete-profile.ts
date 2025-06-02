@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { update } from "@/auth";
 import { redirect } from "next/navigation";
 import { formSchema } from "@/lib/schemas";
-import { combineBirthday } from "@/utils/utils";
+import { combineBirthday } from "@/lib/utils";
 import { LeadChapter } from "@prisma/client";
 
 function formDataToObject(formData: FormData) {

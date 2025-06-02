@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/select";
 import SignOut from "@/components/ui/sign-out";
 import { formSchema } from "@/lib/schemas";
-import { splitBirthday } from "@/utils/utils";
+import { splitBirthday } from "@/lib/utils";
 import { LeadChapter } from "@prisma/client";
 const allSkills = ["JavaScript", "TypeScript", "React", "Node.js", "Figma", "Leadership", "Python"];
 const allLanguages = ["English", "Spanish", "French", "German", "Chinese"];
