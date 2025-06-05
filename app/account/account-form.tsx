@@ -6,12 +6,12 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { completeProfileAction } from "@/actions/complete-profile";
+import { completeProfileAction } from "@/app/account/complete-profile";
 import { Label } from "@/components/ui/label";
 import { ChevronUpIcon } from "lucide-react";
 import { TagsInput } from "./tags-input";
+import { toFormData } from "./utils";
 import { upload_profile_picture } from "@/actions/image-to-storage";
-import type { UserInForm } from "@/types/next-auth";
 import {
   Popover,
   PopoverTrigger,
@@ -45,12 +45,12 @@ import SignOut from "@/components/ui/sign-out";
 import { formSchema } from "@/lib/schemas";
 import { splitBirthday } from "@/lib/utils";
 import { LeadChapter, LeadRole } from "@prisma/client";
-import { all_skills, all_careers, all_languages } from "./account-options";
+import { all_skills, all_careers, all_languages } from "./utils";
 
 type AccountFormProps = {
-  user_profile_data?: {
+  user_profile_data: {
     role?: string;
-    id:string;
+    id: string;
     full_name: string;
     email: string;
     profile_picture?: string;
@@ -78,7 +78,6 @@ export default function AccountForm({
   user_recruiter_data,
   user_member_data,
 }: AccountFormProps) {
-
   const birthdayParts = user_member_data?.birthday
     ? splitBirthday(user_member_data.birthday)
     : { birthday_day: "", birthday_month: "", birthday_year: "" };
@@ -87,18 +86,17 @@ export default function AccountForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       role:
-        user_profile_data?.role === "MEMBER" ||
-        user_profile_data?.role === "RECRUITER" ||
-        user_profile_data?.role === "ADMIN"
+        user_profile_data.role === "member" ||
+        user_profile_data.role === "recruiter" ||
+        user_profile_data.role === "admin"
           ? user_profile_data.role
           : "",
-      full_name: user_profile_data?.full_name ?? "",
-      email: user_profile_data?.email ?? "",
-      profile_picture: user_profile_data?.profile_picture ?? "",
+      full_name: user_profile_data.full_name ?? "",
+      email: user_profile_data.email ?? "",
+      profile_picture: user_profile_data.profile_picture ?? "",
       birthday_day: birthdayParts.birthday_day,
       birthday_month: birthdayParts.birthday_month,
       birthday_year: birthdayParts.birthday_year,
-
       phone: user_member_data?.phone ?? "",
       chapter: user_member_data?.chapter ?? "",
       university_cycle: user_member_data?.university_cycle ?? "",
@@ -115,30 +113,21 @@ export default function AccountForm({
 
   const role = form.watch("role");
 
-   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user_profile_data?.id) return;
 
     const imageUrl = await upload_profile_picture(file);
     if (imageUrl) {
       form.setValue("profile_picture", imageUrl);
-      console.log(imageUrl)
+      console.log(imageUrl);
     }
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        if (value !== undefined) {
-          if (Array.isArray(value)) {
-            value.forEach((item) => formData.append(key, item));
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-      await completeProfileAction(formData);
+      const formData = toFormData(values);
+      await completeProfileAction(formData, user_profile_data.id);
     } catch (error) {
       console.error("Submission error:", error);
     }
@@ -183,25 +172,28 @@ export default function AccountForm({
               </FormItem>
             )}
           />
-        
-           <FormField
-          control={form.control}
-          name="profile_picture"
-          render={() => (
-            <FormItem>
-              <FormLabel>Upload Profile Photo</FormLabel>
-              <Input type="file" accept="image/*" onChange={handleImageUpload} />
-              {form.watch("profile_picture") && (
-                <img
-                  src={form.watch("profile_picture")}
-                  alt="Profile Preview"
-                  className="w-24 h-24 mt-2 rounded-full"
-                />
-              )}
 
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="profile_picture"
+            render={() => (
+              <FormItem>
+                <FormLabel>Upload Profile Photo</FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+                {form.watch("profile_picture") && (
+                  <img
+                    src={form.watch("profile_picture")}
+                    alt="Profile Preview"
+                    className="w-24 h-24 mt-2 rounded-full"
+                  />
+                )}
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -216,8 +208,8 @@ export default function AccountForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="MEMBER">Member</SelectItem>
-                    <SelectItem value="RECRUITER">Recruiter</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="recruiter">Recruiter</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -225,7 +217,7 @@ export default function AccountForm({
             )}
           />
 
-          {role === "MEMBER" && (
+          {role === "member" && (
             <>
               <FormField
                 control={form.control}
@@ -617,7 +609,7 @@ export default function AccountForm({
             </>
           )}
 
-          {role === "RECRUITER" && (
+          {role === "recruiter" && (
             <FormField
               control={form.control}
               name="company"
@@ -638,7 +630,6 @@ export default function AccountForm({
           </Button>
         </form>
       </Form>
-
     </div>
   );
 }
