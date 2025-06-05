@@ -48,3 +48,45 @@ export const all_careers = [
   "Tecnología Médica",
   "Otro",
 ];
+
+export const ARRAY_FIELDS = ['skills', 'languages'];
+
+export function toFormData(data: Record<string, any>): FormData {
+  const formData = new FormData();
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue;
+
+    if (ARRAY_FIELDS.includes(key)) {
+      const arr = Array.isArray(value) ? value : [value];
+      arr.forEach((item) => formData.append(key, item));
+    } else {
+      formData.append(key, value);
+    }
+  }
+
+  return formData;
+}
+
+
+export function formDataToObject(formData: FormData) {
+  const obj: Record<string, any> = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (ARRAY_FIELDS.includes(key)) {
+      if (obj[key]) {
+        obj[key].push(value);
+      } else {
+        obj[key] = [value];
+      }
+    } else {
+      if (obj[key]) {
+        obj[key] = [obj[key], value];
+      } else {
+        obj[key] = value;
+      }
+    }
+  }
+
+  return obj;
+}
