@@ -9,6 +9,7 @@ import {
   DropdownMenuGroup,
 } from "./dropdown-menu";
 import SignIn from "./sign-in";
+import SignOut from "./sign-out";
 import { EditProfileButton } from "./edit-profile-button";
 import {
   Bell,
@@ -25,7 +26,6 @@ import type { User as UserType } from "@prisma/client";
 export default function UserButton({ user }: { user: UserType |  undefined }) {
   if (!user) return <SignIn />;
   const fallbackText = "CN";
-  const showWarning = !user.isProfileComplete;
 
   return (
     <DropdownMenu modal={false}>
@@ -33,26 +33,17 @@ export default function UserButton({ user }: { user: UserType |  undefined }) {
         <Button size="lg" variant={"ghost"} className="gap-2">
           <Avatar className="h-8 w-8 rounded-lg">
             <AvatarImage
-              src={user.image || undefined}
-              alt={user.name || "User avatar"}
+              src={user.profile_picture || undefined}
+              alt={user.full_name || "User avatar"}
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
             <AvatarFallback className="rounded-lg">{fallbackText}</AvatarFallback>
           </Avatar>
           <div className="grid text-left text-sm leading-tight">
-            <span className="truncate font-semibold">{user.name}</span>
+            <span className="truncate font-semibold">{user.full_name}</span>
             <span className="truncate text-xs">{user.role}</span>
           </div>
-          {showWarning && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <AlertCircle className="ml-1 size-4 text-yellow-500" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <span>Tu perfil está incompleto</span>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          
           <ChevronsUpDown className="ml-auto size-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -88,6 +79,7 @@ export default function UserButton({ user }: { user: UserType |  undefined }) {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut />
+          <SignOut/>
           Cerrar Sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
