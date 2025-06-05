@@ -1,58 +1,37 @@
 "use server";
 
-import { update } from "@/auth";
 import { redirect } from "next/navigation";
 import { formSchema } from "@/lib/schemas";
 import { combineBirthday } from "@/lib/utils";
 import { LeadChapter } from "@prisma/client";
 import { LeadRole } from "@prisma/client";
 import { createClient } from "@/utils/supabase/server";
+import { formDataToObject } from "./utils";
 
-function formDataToObject(formData: FormData) {
-  const obj: Record<string, any> = {};
 
-  for (const [key, value] of formData.entries()) {
-    if (obj[key]) {
-      if (Array.isArray(obj[key])) {
-        obj[key].push(value);
-      } else {
-        obj[key] = [obj[key], value];
-      }
-    } else {
-      obj[key] = value;
-    }
-  }
-
-  return obj;
-}
-
-export async function completeProfileAction(formData: FormData): Promise<void> {
+export async function completeProfileAction(formData: FormData, id: string): Promise<void> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const rawValues = formDataToObject(formData);
-
   const parsed = formSchema.safeParse(rawValues);
   if (!parsed.success) {
-    console.error("Validation failed", parsed.error.flatten());
-    throw new Error("Invalid data");
+    console.error("validation failed", parsed.error.flatten());
+    throw new Error("invalid data");
   }
 
   const data = parsed.data;
-const { error } = await supabase
+
+  const { error } = await supabase
   .from("profiles")
   .upsert(
-    { id: user.id, role: data.role },
+    { id: id, role: data.role },
     { onConflict: "id" }
   );
   if (error) throw error;
 
   try {
-    if (data.role === "MEMBER") {
+    if (data.role === "member") {
       const memberData = {
-        id: user?.id,
+        id: id,
         birthday: combineBirthday({
           day: data.birthday_day,
           month: data.birthday_month,
@@ -75,9 +54,9 @@ const { error } = await supabase
         .upsert(memberData);
 
       if (error) throw error;
-    } else if (data.role === "RECRUITER") {
+    } else if (data.role === "recruiter") {
       const recruiterData = {
-        userId: user?.id,
+        id: id,
         company: data.company,
       };
 
@@ -88,10 +67,10 @@ const { error } = await supabase
       if (error) throw error;
     }
 
-    console.log("Profile completed successfully");
+    console.log("profile successful");
   } catch (error: any) {
-    console.error("Error completing profile:", error);
-    throw new Error("Failed to complete profile. " + (error.message || ""));
+    console.error("error in completing profile:", error);
+    throw new Error("failure completing profile. " + (error.message || ""));
   }
 
   redirect("/");
