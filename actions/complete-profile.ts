@@ -1,12 +1,12 @@
 "use server";
 
-import { auth } from "@/auth";
-import prisma from "@/lib/prisma";
 import { update } from "@/auth";
 import { redirect } from "next/navigation";
 import { formSchema } from "@/lib/schemas";
 import { combineBirthday } from "@/lib/utils";
 import { LeadChapter } from "@prisma/client";
+import { LeadRole } from "@prisma/client";
+import { createClient } from "@/utils/supabase/server";
 
 function formDataToObject(formData: FormData) {
   const obj: Record<string, any> = {};
@@ -27,30 +27,32 @@ function formDataToObject(formData: FormData) {
 }
 
 export async function completeProfileAction(formData: FormData): Promise<void> {
-  console.log(formData, "is form data")
-
-    const session = await auth();
-  if (!session?.user?.email) throw new Error("not authenticated");
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-  if (!user) throw new Error("user not found");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const rawValues = formDataToObject(formData);
 
   const parsed = formSchema.safeParse(rawValues);
   if (!parsed.success) {
-    console.error("validation failed", parsed.error.flatten());
-    throw new Error("invalid data");
+    console.error("Validation failed", parsed.error.flatten());
+    throw new Error("Invalid data");
   }
 
   const data = parsed.data;
+const { error } = await supabase
+  .from("profiles")
+  .upsert(
+    { id: user.id, role: data.role },
+    { onConflict: "id" }
+  );
+  if (error) throw error;
 
   try {
     if (data.role === "MEMBER") {
       const memberData = {
-        userId: user.id,
+        id: user?.id,
         birthday: combineBirthday({
           day: data.birthday_day,
           month: data.birthday_month,
@@ -58,7 +60,7 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         }),
         phone: data.phone,
         chapter: LeadChapter[data.chapter as keyof typeof LeadChapter],
-        lead_role: data.lead_role,
+        lead_role: LeadRole[data.lead_role as keyof typeof LeadRole],
         university_cycle: Number(data.university_cycle),
         career: data.career,
         linkedin_url: data.linkedin_url,
@@ -68,46 +70,28 @@ export async function completeProfileAction(formData: FormData): Promise<void> {
         skills: data.skills,
       };
 
-      await prisma.member.upsert({
-        where: { userId: user.id },
-        update: memberData,
-        create: memberData,
-      });
+      const { error } = await supabase
+        .from("member_profiles")
+        .upsert(memberData);
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { role: "MEMBER", isProfileComplete: true },
-      });
+      if (error) throw error;
     } else if (data.role === "RECRUITER") {
       const recruiterData = {
-        userId: user.id,
-        company: data.company!,
+        userId: user?.id,
+        company: data.company,
       };
 
-      await prisma.recruiter.upsert({
-        where: { userId: user.id },
-        update: recruiterData,
-        create: recruiterData,
-      });
+      const { error } = await supabase
+        .from("recruiter_profiles")
+        .upsert(recruiterData);
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { role: "RECRUITER", isProfileComplete: true },
-      });
+      if (error) throw error;
     }
 
-    await update({
-      user: {
-        id: user.id,
-        isProfileComplete: true,
-      },
-    });
-
-    console.log("succesful");
-    
+    console.log("Profile completed successfully");
   } catch (error: any) {
-    console.error("error completing profile:", error);
-    throw new Error("failed to complete profile. " + (error.message || ""));
+    console.error("Error completing profile:", error);
+    throw new Error("Failed to complete profile. " + (error.message || ""));
   }
 
   redirect("/");
