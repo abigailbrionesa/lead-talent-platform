@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+
 import authConfig from "./auth.config";
 
 export const {
@@ -109,4 +110,5 @@ export const {
   pages: {
     signIn: "/login",
   },
+  
 });
