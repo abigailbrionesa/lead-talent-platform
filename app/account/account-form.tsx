@@ -10,6 +10,7 @@ import { completeProfileAction } from "@/actions/complete-profile";
 import { Label } from "@/components/ui/label";
 import { ChevronUpIcon } from "lucide-react";
 import { TagsInput } from "./tags-input";
+import { upload_profile_picture } from "@/actions/image-to-storage";
 import type { UserInForm } from "@/types/next-auth";
 import {
   Popover,
@@ -43,104 +44,105 @@ import {
 import SignOut from "@/components/ui/sign-out";
 import { formSchema } from "@/lib/schemas";
 import { splitBirthday } from "@/lib/utils";
-import { LeadChapter } from "@prisma/client";
-const allSkills = ["JavaScript", "TypeScript", "React", "Node.js", "Figma", "Leadership", "Python"];
-const allLanguages = ["English", "Spanish", "French", "German", "Chinese"];
-import { LeadRole } from "@prisma/client";
+import { LeadChapter, LeadRole } from "@prisma/client";
+import { all_skills, all_careers, all_languages } from "./account-options";
 
+type AccountFormProps = {
+  user_profile_data?: {
+    role?: string;
+    id:string;
+    full_name: string;
+    email: string;
+    profile_picture?: string;
+  };
+  user_recruiter_data?: {
+    company?: string;
+  };
+  user_member_data?: {
+    birthday?: string;
+    phone?: string;
+    chapter?: string;
+    university_cycle?: string;
+    lead_role?: string;
+    career?: string;
+    linkedin_url?: string;
+    resume_url?: string;
+    availability?: string;
+    skills?: string[];
+    languages?: string[];
+  };
+};
 
-const careers = [
-  "Biología",
-  "Biotecnología",
-  "Bioquímica",
-  "Ciencias Ambientales",
-  "Ciencias de la Computación",
-  "Ciencias Físicas",
-  "Ciencias Matemáticas",
-  "Estadística",
-  "Genética",
-  "Microbiología",
-  "Química",
-  "Geología",
-  "Geofísica",
-  "Ingeniería de Sistemas",
-  "Ingeniería de Software",
-  "Ingeniería Informática",
-  "Ciencia de Datos",
-  "Ciberseguridad",
-  "Inteligencia Artificial",
-  "Ingeniería Civil",
-  "Ingeniería Industrial",
-  "Ingeniería Mecánica",
-  "Ingeniería Electrónica",
-  "Ingeniería Eléctrica",
-  "Ingeniería Química",
-  "Ingeniería de Telecomunicaciones",
-  "Ingeniería de Minas",
-  "Ingeniería Ambiental",
-  "Ingeniería Biomédica",
-  "Matemáticas",
-  "Física",
-  "Bioinformática",
-  "Nanotecnología",
-  "Arquitectura",
-  "Tecnología Médica",
-  "Otro",
-];
+export default function AccountForm({
+  user_profile_data,
+  user_recruiter_data,
+  user_member_data,
+}: AccountFormProps) {
 
-export default function AccountForm({ user }: { user: UserInForm }) {
-
-  let birthday_data = { day: "", month: "", year: "" };
-
-  if (user?.member?.birthday) {
-    birthday_data = splitBirthday(user.member.birthday);
-  }
+  const birthdayParts = user_member_data?.birthday
+    ? splitBirthday(user_member_data.birthday)
+    : { birthday_day: "", birthday_month: "", birthday_year: "" };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role: user?.role as "MEMBER" | "RECRUITER" | "ADMIN",
-      name: user?.name || "",
-      email: user?.email || "",
-      image: user?.image || "",
-      birthday_day: birthday_data.day || "",
-      birthday_month: birthday_data.month || "",
-      birthday_year: birthday_data.year || "",
-      phone: user?.member?.phone || "",
-      chapter: user?.member?.chapter || "",
-      university_cycle: user?.member?.university_cycle || "",
-      lead_role: user?.member?.lead_role || "",
-      career: user?.member?.career || "",
-      linkedin_url: user?.member?.linkedin_url || "",
-      resume_url: user?.member?.resume_url || "",
-      availability: user?.member?.availability || "",
-      company: user?.recruiter?.company || "",
-      skills: user?.member?.skills || [],
-      languages: user?.member?.languages || [],
+      role:
+        user_profile_data?.role === "MEMBER" ||
+        user_profile_data?.role === "RECRUITER" ||
+        user_profile_data?.role === "ADMIN"
+          ? user_profile_data.role
+          : "",
+      full_name: user_profile_data?.full_name ?? "",
+      email: user_profile_data?.email ?? "",
+      profile_picture: user_profile_data?.profile_picture ?? "",
+      birthday_day: birthdayParts.birthday_day,
+      birthday_month: birthdayParts.birthday_month,
+      birthday_year: birthdayParts.birthday_year,
+
+      phone: user_member_data?.phone ?? "",
+      chapter: user_member_data?.chapter ?? "",
+      university_cycle: user_member_data?.university_cycle ?? "",
+      lead_role: user_member_data?.lead_role ?? "",
+      career: user_member_data?.career ?? "",
+      linkedin_url: user_member_data?.linkedin_url ?? "",
+      resume_url: user_member_data?.resume_url ?? "",
+      availability: user_member_data?.availability ?? "",
+      company: user_recruiter_data?.company ?? "",
+      skills: user_member_data?.skills ?? [],
+      languages: user_member_data?.languages ?? [],
     },
   });
 
   const role = form.watch("role");
 
-async function onSubmit(values: z.infer<typeof formSchema>) {
-  try {
-    const formData = new FormData();
+   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user_profile_data?.id) return;
 
-    Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined) {
-        if (Array.isArray(value)) {
-          value.forEach((item) => formData.append(key, item));
-        } else {
-          formData.append(key, value.toString());
+    const imageUrl = await upload_profile_picture(file);
+    if (imageUrl) {
+      form.setValue("profile_picture", imageUrl);
+      console.log(imageUrl)
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== undefined) {
+          if (Array.isArray(value)) {
+            value.forEach((item) => formData.append(key, item));
+          } else {
+            formData.append(key, value.toString());
+          }
         }
-      }
-    });
-
-    await completeProfileAction(formData);
-  } catch (error) {
-    console.error("Submission error:", error);
+      });
+      await completeProfileAction(formData);
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
   }
-}
 
   return (
     <div className="max-w-xl mx-auto py-10">
@@ -156,7 +158,7 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
         >
           <FormField
             control={form.control}
-            name="name"
+            name="full_name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
@@ -181,23 +183,25 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
               </FormItem>
             )}
           />
+        
+           <FormField
+          control={form.control}
+          name="profile_picture"
+          render={() => (
+            <FormItem>
+              <FormLabel>Upload Profile Photo</FormLabel>
+              <Input type="file" accept="image/*" onChange={handleImageUpload} />
+              {form.watch("profile_picture") && (
+                <img
+                  src={form.watch("profile_picture")}
+                  alt="Profile Preview"
+                  className="w-24 h-24 mt-2 rounded-full"
+                />
+              )}
 
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile Image URL</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://example.com/photo.jpg"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            </FormItem>
+          )}
+        />
 
           <FormField
             control={form.control}
@@ -222,46 +226,44 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
           />
 
           {role === "MEMBER" && (
-            <>  
+            <>
+              <FormField
+                control={form.control}
+                name="skills"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Skills</FormLabel>
+                    <FormControl>
+                      <TagsInput
+                        placeholder="Search or type to add skills"
+                        options={all_skills}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-  control={form.control}
-  name="skills"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Skills</FormLabel>
-      <FormControl>
-        <TagsInput
-          placeholder="Search or type to add skills"
-          options={allSkills}
-          value={field.value}
-          onChange={field.onChange}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
-<FormField
-  control={form.control}
-  name="languages"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Languages</FormLabel>
-      <FormControl>
-        <TagsInput
-          placeholder="Search or type to add languages"
-          options={allLanguages}
-          value={field.value}
-          onChange={field.onChange}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
+              <FormField
+                control={form.control}
+                name="languages"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Languages</FormLabel>
+                    <FormControl>
+                      <TagsInput
+                        placeholder="Search or type to add languages"
+                        options={all_languages}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Label>Birth date</Label>
               <div className="flex gap-2">
@@ -335,79 +337,90 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
               />
 
               <FormField
-  control={form.control}
-  name="chapter"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Chapter</FormLabel>
-      <FormControl>
-        <Select onValueChange={field.onChange} defaultValue={field.value}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select chapter" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(LeadChapter).map((chapter) => (
-              <SelectItem key={chapter} value={chapter}>
-                {chapter}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                control={form.control}
+                name="chapter"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chapter</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select chapter" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(LeadChapter).map((chapter) => (
+                            <SelectItem key={chapter} value={chapter}>
+                              {chapter}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
-  control={form.control}
-  name="university_cycle"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>University Cycle</FormLabel>
-      <FormControl>
-        <Select onValueChange={field.onChange} defaultValue={field.value}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select your cycle" />
-          </SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((cycle) => (
-              <SelectItem key={cycle} value={cycle.toString()}>
-                {cycle}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                control={form.control}
+                name="university_cycle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>University Cycle</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your cycle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                            (cycle) => (
+                              <SelectItem key={cycle} value={cycle.toString()}>
+                                {cycle}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
-  control={form.control}
-  name="lead_role"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>LEAD Role</FormLabel>
-      <FormControl>
-        <Select onValueChange={field.onChange} defaultValue={field.value}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select your role" />
-          </SelectTrigger>
-          <SelectContent>
-             {Object.values(LeadRole).map((role) => (
-              <SelectItem key={role} value={role}>
-                {role}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                control={form.control}
+                name="lead_role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LEAD Role</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(LeadRole).map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {role}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -467,7 +480,7 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
                               </div>
                             </CommandEmpty>
                             <CommandGroup>
-                              {careers.map((career) => (
+                              {all_careers.map((career) => (
                                 <CommandItem
                                   key={career}
                                   value={career}
@@ -527,10 +540,10 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
                 name="resume_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Resume URL</FormLabel>
+                    <FormLabel>Resumen Profile URL</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://example.com/your-resume.pdf"
+                        placeholder="https://linkedin.com/in/yourprofile"
                         {...field}
                       />
                     </FormControl>
@@ -538,30 +551,69 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
                   </FormItem>
                 )}
               />
+              {/*
+              <FormField
+                control={form.control}
+                name="resume_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Upload Resume (PDF)</FormLabel>
+                    <Input
+                      type="file"
+                      accept=".pdf"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const path = `${user.id}/resume.pdf`;
+                        const { data, error } = await supabase.storage
+                          .from("resumes")
+                          .upload(path, file, { upsert: true });
+                        if (error) {
+                          console.error("Error uploading resume:", error);
+                          return;
+                        }
+
+                        const resumeUrl = supabase.storage
+                          .from("resumes")
+                          .getPublicUrl(data.path).data.publicUrl;
+
+                        form.setValue("resume_url", resumeUrl);
+                      }}
+                    />
+                  </FormItem>
+                )}
+              /> */}
 
               <FormField
-  control={form.control}
-  name="availability"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Availability</FormLabel>
-      <FormControl>
-        <Select onValueChange={field.onChange} defaultValue={field.value}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select availability" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Full-time">Full-time</SelectItem>
-            <SelectItem value="Part-time">Part-time</SelectItem>
-            <SelectItem value="Internships">Internships</SelectItem>
-            <SelectItem value="Not available">Not available</SelectItem>
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                control={form.control}
+                name="availability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Availability</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select availability" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Full-time">Full-time</SelectItem>
+                          <SelectItem value="Part-time">Part-time</SelectItem>
+                          <SelectItem value="Internships">
+                            Internships
+                          </SelectItem>
+                          <SelectItem value="Not available">
+                            Not available
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </>
           )}
 
@@ -587,7 +639,6 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
         </form>
       </Form>
 
-      <pre className="mt-8 p-4 rounded-md">{JSON.stringify(user, null, 2)}</pre>
     </div>
   );
 }
