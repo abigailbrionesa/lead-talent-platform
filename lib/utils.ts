@@ -5,12 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function splitBirthday(birthdayString: string): { day: string; month: string; year: string } {
+export function splitBirthday(birthdayString: string): { birthday_day: string; birthday_month: string; birthday_year: string } {
   const [year, month, day] = birthdayString.split("-");
   return {
-    day: day || "",
-    month: month || "",
-    year: year || "",
+    birthday_day: day || "",
+    birthday_month: month || "",
+    birthday_year: year || "",
   };
 }
 
