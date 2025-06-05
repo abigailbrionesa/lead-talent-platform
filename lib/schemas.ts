@@ -18,9 +18,9 @@ export const memberSchema = z.object({
   linkedin_url: z.string().url(),
   resume_url: z.string().url(),
   availability: z.string().min(2),
-  name: z.string().min(2),
+  full_name: z.string().min(2),
   email: z.string().email(),
-  image: z.string().url().optional(),
+  profile_picture: z.string().url().optional(),
   skills: z.array(z.string()).min(1),
   languages: z.array(z.string()).min(1),
 });
@@ -28,18 +28,27 @@ export const memberSchema = z.object({
 export const recruiterSchema = z.object({
   role: z.literal("RECRUITER"),
   company: z.string().min(2),
-  name: z.string().min(2),
+  full_name: z.string().min(2),
   email: z.string().email(),
-  image: z.string().url().optional(),
+  profile_picture: z.string().url().optional(),
 });
 
 export const adminSchema = z.object({
   role: z.literal("ADMIN"),
-  name: z.string().min(2),
+  full_name: z.string().min(2),
   email: z.string().email(),
-  image: z.string().url().optional(),
+  profile_picture: z.string().url().optional(),
 });
 
-export const formSchema = z.discriminatedUnion("role", [memberSchema, recruiterSchema, adminSchema]);
+
+export const emptyRoleSchema = z.object({
+  role: z.literal(""),
+});
 
 
+export const formSchema = z.discriminatedUnion("role", [
+  memberSchema,
+  recruiterSchema,
+  adminSchema,
+  emptyRoleSchema,
+]);
