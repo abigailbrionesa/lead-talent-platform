@@ -23,17 +23,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
 import type { User as UserType } from "@prisma/client";
-
+import SignOut from "../ui/sign-out";
 interface RouteProps {
   href: string;
   label: string;
 }
 
 export const Navbar = ({ user }: { user: UserType |  undefined }) => {
-    const routeList: RouteProps[] = user?.role === "RECRUITER"
-      ? [{ href: "/dashboard", label: "Tabla de Miembros" }]
-      : [];
-      
+  const routeList: RouteProps[] = [{ href: "/dashboard", label: "Tabla de Miembros" }]
+
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -143,7 +141,7 @@ export const Navbar = ({ user }: { user: UserType |  undefined }) => {
             <Github className="size-5" />
           </Link>
         </Button>
-
+                <SignOut/>
         <UserButton user={user} />
         
       </div>
