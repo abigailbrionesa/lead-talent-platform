@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { completeProfileAction } from "@/actions/complete-profile";
+import { completeProfileAction } from "@/app/account/complete-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
