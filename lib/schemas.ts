@@ -6,7 +6,7 @@ const today = new Date();
 const minYear = today.getFullYear() - 18;
 
 export const memberSchema = z.object({
-  role: z.literal("MEMBER"),
+  role: z.literal("member"),
   birthday_day: z.string().min(1).max(31),
   birthday_month: z.string().min(1).max(12),
   birthday_year: z.string().min(4).max(4),
@@ -26,7 +26,7 @@ export const memberSchema = z.object({
 });
 
 export const recruiterSchema = z.object({
-  role: z.literal("RECRUITER"),
+  role: z.literal("recruiter"),
   company: z.string().min(2),
   full_name: z.string().min(2),
   email: z.string().email(),
@@ -34,7 +34,7 @@ export const recruiterSchema = z.object({
 });
 
 export const adminSchema = z.object({
-  role: z.literal("ADMIN"),
+  role: z.literal("admin"),
   full_name: z.string().min(2),
   email: z.string().email(),
   profile_picture: z.string().url().optional(),
