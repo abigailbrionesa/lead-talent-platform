@@ -42,6 +42,13 @@ export default async function AccountPage() {
     .eq("id", user.id)
     .single();  
 
+    //user_profile_data is created with all the roles minus "role" when ser registers
+    //in this function "ROLE" and "PROFILE_PICTURE" of user_profile_data can be null
+
+    //if role is null, you should just pass user_profile_data
+    //if role is not null, you should pass that joined o user profile_data
+    //so user_member_data nad user_recruiter_data can be null 
+
   return (
     <div>
       <Navbar user={user_profile_data} />
