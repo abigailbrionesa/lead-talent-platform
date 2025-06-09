@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 
 
 export default async function Home() {
+
+  {/* 
   const supabase = await createClient();
   const {
     data: { session },
@@ -27,12 +29,9 @@ export default async function Home() {
     profile = data;
   } else {
     redirect("/login");
-  }
+  }*/}
 
   return (
-    <div>
-      <Navbar user={profile} />
-      <LandingSection user={profile} />
-    </div>
+      <LandingSection /> //i just want their role
   );
 }
