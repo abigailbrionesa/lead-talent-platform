@@ -1,6 +1,7 @@
 "use client";
 import { Github, Menu, User } from "lucide-react";
 import React, { useState } from "react";
+
 import UserButton from "../ui/user-button";
 import {
   Sheet,
@@ -22,15 +23,19 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
-import type { User as UserType } from "@prisma/client";
-import SignOut from "../ui/sign-out";
-interface RouteProps {
+
+interface route_props {
   href: string;
   label: string;
 }
+import type { nav_user_type } from "@/types/next-auth";
 
-export const Navbar = ({ user }: { user: UserType |  undefined }) => {
-  const routeList: RouteProps[] = [{ href: "/dashboard", label: "Tabla de Miembros" }]
+export const Navbar = ({ user }: { user: nav_user_type |  null }) => {
+  console.log("user", user)
+  const route_list: route_props[] = 
+    user?.role === "recruiter" || user?.role === "admin"
+      ? [{ href: "/dashboard", label: "Tabla de Miembros" }]
+      : [];
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -54,7 +59,7 @@ export const Navbar = ({ user }: { user: UserType |  undefined }) => {
       <NavigationMenu className="hidden lg:block mr-auto ">
         <NavigationMenuList className="flex">
           <NavigationMenuItem className="flex">
-            {routeList.map(({ href, label }) => (
+            {route_list.map(({ href, label }) => (
               <NavigationMenuLink key={href} asChild>
                 <Link href={href} target="_blank" className="text-base px-2">
                   {label}
@@ -93,7 +98,7 @@ export const Navbar = ({ user }: { user: UserType |  undefined }) => {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-2">
-                {routeList.map(({ href, label }) => (
+                {route_list.map(({ href, label }) => (
                   <Button
                     key={href}
                     onClick={() => setIsOpen(false)}
@@ -141,7 +146,7 @@ export const Navbar = ({ user }: { user: UserType |  undefined }) => {
             <Github className="size-5" />
           </Link>
         </Button>
-                <SignOut/>
+              
         <UserButton user={user} />
         
       </div>
