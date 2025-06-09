@@ -12,9 +12,8 @@ import { Button } from "../ui/button";
 import type { User as UserType } from "@prisma/client";
 import { EditProfileButton } from "../ui/edit-profile-button";
 
-export const LandingSection = ({ user }: { user: UserType | undefined }) => {
+export const LandingSection = () => {
   const title = "LEAD Talent Platform";
-  console.log(user?.role);
   const words = title.split(" ");
   return (
     <div className=" min-h-screen  flex items-center justify-center  bg-background">
@@ -56,6 +55,15 @@ export const LandingSection = ({ user }: { user: UserType | undefined }) => {
           profesionales.
         </p>
 
+      </div>
+    </div>
+  );
+};
+
+
+{/* 
+  
+  
           {!user && (
           <Card className="w-[350px] mx-auto mt-10">
             <CardHeader>
@@ -117,7 +125,5 @@ export const LandingSection = ({ user }: { user: UserType | undefined }) => {
             </CardFooter>
           </Card>
         )}
-      </div>
-    </div>
-  );
-};
+          
+        */}
