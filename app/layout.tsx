@@ -28,13 +28,14 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(geistSans.variable,geistMono.variable,"antialiased","min-h-screen bg-background")}>
-        <NavbarServer />
+        
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          <NavbarServer />
           {children}
         </ThemeProvider>
       </body>
